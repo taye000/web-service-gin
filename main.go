@@ -29,6 +29,8 @@ func main() {
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbumByID)
+	router.PUT("/albums/:id", updateAlbum)
+	router.POST("/albums/:id", deleteAlbum)
 	router.POST("/albums", postAlbums)
 	//Use the Run function to attach the router to an http.Server and start the server.
 	router.Run("localhost:8080")
@@ -63,12 +65,67 @@ func getAlbumByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"msg": "Album not found"})
 }
 
+//TODO: deleteAlbum by ID
+func deleteAlbum(c *gin.Context) {
+	id := c.Param("id")
+
+	//find the index(i) of the album with the matching ID.
+	index := -1
+	for i, a := range albums {
+		if a.ID == id {
+			index = i
+			break
+		}
+	}
+	//if no album is found
+	if index == -1 {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+	//delete the album from the slice at the index i.
+	albums = append(albums[:index], albums[index+1:]...)
+
+	//return a status code of 204 No Content.
+	c.Status(http.StatusNoContent)
+}
+
+//updateAlbum by id
+func updateAlbum(c *gin.Context) {
+	id := c.Param("id")
+
+	//find the index(i) of the album with the matching ID.
+	index := -1
+	for i, a := range albums {
+		if a.ID == id {
+			index = i
+			break
+		}
+	}
+
+	//if no album is found.
+	if index == -1 {
+		//AbortWithStatus() is used to immediately abort processing the request and return a specified HTTP status code to the client.
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	//BindJSON to bind the received JSON to newAlbum.
+	var updatedAlbum album
+	if err := c.BindJSON(&updatedAlbum); err != nil {
+		return
+	}
+	//update the album in the slice at the index i.
+	albums[index] = updatedAlbum
+
+	/*IndentedJSON serializes the given struct as pretty JSON (indented + endlines) into the response body.*/
+	c.IndentedJSON(http.StatusOK, updatedAlbum)
+}
+
 // postAlbums adds an album from JSON received in the request body.
 func postAlbums(c *gin.Context) {
 	//initialize a newAlbum of type album.
 	var newAlbum album
 
-	//call BindJSON to bind the received JSON to newAlbum.
+	//BindJSON to bind the received JSON to newAlbum.
 	if err := c.BindJSON(&newAlbum); err != nil {
 		return
 	}
