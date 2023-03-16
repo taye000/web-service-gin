@@ -28,6 +28,7 @@ func main() {
 	//Initialize a Gin router using Default.
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
+	router.GET("/albums/:id", getAlbumByID)
 	router.POST("/albums", postAlbums)
 	//Use the Run function to attach the router to an http.Server and start the server.
 	router.Run("localhost:8080")
@@ -43,6 +44,23 @@ func getAlbums(c *gin.Context) {
 	Note that you can replace Context.IndentedJSON with a call to Context.JSON to send more compact JSON.
 	In practice, the indented form is much easier to work with when debugging and the size difference is usually small.*/
 	c.IndentedJSON(http.StatusOK, albums)
+}
+
+//get a single album by ID
+func getAlbumByID(c *gin.Context) {
+	//extract the id from the request path.
+	id := c.Param("id")
+
+	//loop through the list of albums, looking for an album whose ID value matches the parameter value.
+	for _, a := range albums {
+		if a.ID == id {
+			//if album is found, call IndentedJSON to return the album(a) as a response.
+			c.IndentedJSON(http.StatusOK, a)
+			return
+		}
+	}
+	//if no album is found.
+	c.IndentedJSON(http.StatusNotFound, gin.H{"msg": "Album not found"})
 }
 
 // postAlbums adds an album from JSON received in the request body.
