@@ -2,8 +2,8 @@ package main
 
 import (
 	"net/http"
-
 	"github.com/gin-gonic/gin"
+	
 )
 
 /*album represents data about a record album.
@@ -30,7 +30,7 @@ func main() {
 	router.GET("/albums", getAlbums)
 	router.GET("/albums/:id", getAlbumByID)
 	router.PUT("/albums/:id", updateAlbum)
-	router.POST("/albums/:id", deleteAlbum)
+	router.DELETE("/albums/:id", deleteAlbum)
 	router.POST("/albums", postAlbums)
 	//Use the Run function to attach the router to an http.Server and start the server.
 	router.Run("localhost:8080")
@@ -81,7 +81,16 @@ func deleteAlbum(c *gin.Context) {
 	if index == -1 {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
-	//delete the album from the slice at the index i.
+	/*delete the album from the slice at the index i.
+	albums[:index]: This is a slice that includes all the elements of albums before the album to be deleted.
+	It starts at the beginning of the albums slice and goes up to (but not including) the album to be deleted, which has index index.
+	albums[index+1:]: This is a slice that includes all the elements of albums after the album to be deleted.
+	It starts at the element immediately after the album to be deleted and goes up to the end of the albums slice.
+	...: This operator unpacks the slices from steps 1 and 2 into separate arguments for the append() function.
+	append(albums[:index], albums[index+1:]...): This concatenates the two slices from steps 1 and 2 
+	and returns a new slice that excludes the album to be deleted.
+	albums = append(albums[:index], albums[index+1:]...): This assigns the new slice back to the albums variable, 
+	effectively removing the album at the specified index from the albums slice.*/
 	albums = append(albums[:index], albums[index+1:]...)
 
 	//return a status code of 204 No Content.
