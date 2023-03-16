@@ -28,6 +28,7 @@ func main() {
 	//Initialize a Gin router using Default.
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
+	router.POST("/albums", postAlbums)
 	//Use the Run function to attach the router to an http.Server and start the server.
 	router.Run("localhost:8080")
 }
@@ -42,4 +43,22 @@ func getAlbums(c *gin.Context) {
 	Note that you can replace Context.IndentedJSON with a call to Context.JSON to send more compact JSON.
 	In practice, the indented form is much easier to work with when debugging and the size difference is usually small.*/
 	c.IndentedJSON(http.StatusOK, albums)
+}
+
+// postAlbums adds an album from JSON received in the request body.
+func postAlbums(c *gin.Context) {
+	//initialize a newAlbum of type album.
+	var newAlbum album
+
+	//call BindJSON to bind the received JSON to newAlbum.
+	if err := c.BindJSON(&newAlbum); err != nil {
+		return
+	}
+
+	//add the new album to the slice.
+	albums = append(albums, newAlbum)
+
+	/*IndentedJSON serializes the given struct as pretty JSON (indented + endlines) into the response body.
+	It also sets the Content-Type as "application/json".*/
+	c.IndentedJSON(http.StatusCreated, newAlbum)
 }
